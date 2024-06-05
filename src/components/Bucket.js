@@ -15,7 +15,7 @@ const Bucket = (props) => {
           {
             transform: [{ translateY: animatedValue.interpolate({
                 inputRange: [0, 1],
-                outputRange: [0, -10], // Adjust the value to control how much the bucket moves up
+                outputRange: [0, -5],
               }),
             }],
           },

@@ -3,7 +3,10 @@ import { GameEngine } from "react-native-game-engine";
 import { useCallback, useRef } from "react";
 import { debounce } from "lodash";
 
+//entities
 import entities from "../entities";
+
+//physics
 import Physics from "../physics";
 
 const GameApp = () => {

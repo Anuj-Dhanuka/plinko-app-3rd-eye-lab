@@ -1,10 +1,11 @@
 import Matter from "matter-js";
 import { Animated, Dimensions } from "react-native";
 
+//components
 import Plinko from "./components/Plinko";
 import Bucket from "./components/Bucket";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+const { width: screenWidth} = Dimensions.get("window");
 
 const entities = () => {
   let engine = Matter.Engine.create({ enableSleeping: false });

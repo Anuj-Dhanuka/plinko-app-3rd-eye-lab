@@ -1,16 +1,19 @@
 import Matter from "matter-js";
-import Ball from "./components/Ball";
 import { Animated, Dimensions } from "react-native";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+//components
+import Ball from "./components/Ball";
+
+const { width: screenWidth } = Dimensions.get("window");
 let ballCount = 0;
 const collidePairs = new Set();
-const Physics = (entities, { time, dispatch, events }, targetBucket = 5) => {
+
+const Physics = (entities, { time, dispatch, events }, targetBucket = 2) => {
   const engine = entities.physics.engine;
 
   Matter.Engine.update(engine, time.delta);
 
-  const defaultGravity = 0; 
+  const defaultGravity = 0;
 
 
   const eventsArray = events || [];
@@ -58,7 +61,6 @@ const Physics = (entities, { time, dispatch, events }, targetBucket = 5) => {
       const forceMagnitude = 4;
 
       if (plinko.isFirstColumn) {
-        // Move the ball to the right
         Matter.Body.setVelocity(ball, { x: 0.5, y: -2 });
         Matter.Body.applyForce(bodyA, bodyB.position, {
           x: forceMagnitude,
@@ -79,7 +81,6 @@ const Physics = (entities, { time, dispatch, events }, targetBucket = 5) => {
           yDifferenceBetweenBallAndBucket / 30
         );
   
-        //console.log(xDifference, yDifference)
         let xDirectionVelocity;
   
         if (
@@ -96,8 +97,6 @@ const Physics = (entities, { time, dispatch, events }, targetBucket = 5) => {
           xDirectionVelocity = 3;
         }
   
-        
-        //console.log(bodyA.label, bodyB.label)
         if (
           (bodyA.label === "ball" && bodyB.label === "plinko") ||
           (bodyA.label === "plinko" && bodyB.label === "ball")
@@ -105,7 +104,6 @@ const Physics = (entities, { time, dispatch, events }, targetBucket = 5) => {
           const collisionId = `${bodyA.id}_${bodyB.id}`;
           Matter.Body.setVelocity(bodyA, { x: bodyB.velocity.x, y: -4 });
           if (bodyA.row >= 6) {
-            //if (!collidePairs.has(collisionId)) {
             if (xDifferenceBetweenBallAndBucket < 0) {
               Matter.Body.setVelocity(bodyA, { x: -xDirectionVelocity, y: -4 });
               Matter.Body.applyForce(bodyA, bodyB.position, {
@@ -140,11 +138,8 @@ const Physics = (entities, { time, dispatch, events }, targetBucket = 5) => {
                 y: 0,
               });
             }
-            //Matter.Body.setAngularVelocity(bodyA, 0);
             collidePairs.add(bodyB);
-            //console.log("collide")
           }
-          //}
         }
       }
 
@@ -159,15 +154,34 @@ const Physics = (entities, { time, dispatch, events }, targetBucket = 5) => {
           (key) => entities[key].body === ballBody
         );
 
-        if (ballKey) {
-          Matter.World.remove(engine.world, ballBody);
-          delete entities[ballKey];          
-        }
         const bucketBody = bodyA.label === "bucket" ? bodyA : bodyB;
         const bucketKey = Object.keys(entities).find(
           (key) => entities[key].body === bucketBody
         );
 
+        const animatedValue = entities[bucketKey].animatedValue;
+
+        if (ballKey) {
+          Matter.World.remove(engine.world, ballBody);
+          delete entities[ballKey];  
+
+          Animated.sequence([
+            Animated.timing(animatedValue, {
+              toValue: 1,
+              duration: 100,
+              useNativeDriver: true, 
+            }),
+            Animated.timing(animatedValue, {
+              toValue: 0,
+              duration: 500,
+              useNativeDriver: true,
+            }),
+          ]).start(({ finished }) => {
+            if (finished) {
+              animatedValue.setValue(0);
+            }
+          });      
+        }
         
 
       }
