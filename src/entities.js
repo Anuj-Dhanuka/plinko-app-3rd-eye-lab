@@ -5,25 +5,30 @@ import { Animated, Dimensions } from "react-native";
 import Plinko from "./components/Plinko";
 import Bucket from "./components/Bucket";
 
+//utils
+import { NUMBER_OF_ROWS, PLINKO_RADIUS, SPACING_Y, SPACING_X, PLINKO_TOP_DISTANCE, BUCKET_HEIGHT } from "./utils/CommonUtils";
+
 const { width: screenWidth} = Dimensions.get("window");
 
-const entities = () => {
+const entities = (handleScore) => {
+  
   let engine = Matter.Engine.create({ enableSleeping: false });
   let world = engine.world;
 
   engine.world.gravity.y = 0.2;
   engine.world.gravity.x = 0;
 
-  const numberOfRows = 16;
-  const plinkoRadius = 3;
+  const numberOfRows = NUMBER_OF_ROWS;
+  const plinkoRadius = PLINKO_RADIUS;
+  const plinkoSpacingY = SPACING_Y;
+  const plinkoSpacingX = SPACING_X;
+  const plinkoTopDistance = PLINKO_TOP_DISTANCE;
+  const bucketWidth = plinkoSpacingX - plinkoRadius * 2;
+  const bucketHeight = BUCKET_HEIGHT;
+
+  let lastRowFirstPlinkoPosition = [];
   let plinkos = [];
   let buckets = [];
-  const plinkoSpacingY = 30;
-  const plinkoSpacingX = 18;
-  const plinkoTopDistance = 100;
-  const bucketWidth = plinkoSpacingX - plinkoRadius * 2;
-  const bucketHeight = 13;
-  let lastRowFirstPlinkoPosition = [];
 
   const bucketDetails = [
     { points: 110, color: "#FF0000" },
@@ -56,10 +61,11 @@ const entities = () => {
         isStatic: true,
         restitution: 1,
         friction: 0.5,
+        isHighlighted: false,
+        label: "plinko",
+        row: i,
+        isFirstColumn: j === 0
       });
-      plinko.label = "plinko";
-      plinko.row = i;
-      plinko.isFirstColumn = j === 0;
       Matter.World.add(world, plinko);
       plinkos.push({
         body: plinko,
@@ -95,7 +101,8 @@ const entities = () => {
       renderer: Bucket,
       color: bucketDetails[i].color,
       points: bucketDetails[i].points,
-      animatedValue: animatedValue
+      animatedValue: animatedValue,
+      updateScore: handleScore
     });
   }
 

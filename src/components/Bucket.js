@@ -1,11 +1,21 @@
 import { Animated, StyleSheet, View, Text } from "react-native";
 
+//dimension utils 
+import { normalize, scaleVertical } from "../utils/DimensionUtils";
+
+//context 
+import { useTheme } from "../context/ThemeContext";
+
 const Bucket = (props) => {
+  const {currentTheme} = useTheme()
+
   const { size, color, points, animatedValue } = props;
   const [height, width] = size;
 
   const x = props.body.position.x - width / 2;
   const y = props.body.position.y - height / 2;
+
+  const styles = getStyles(currentTheme);
 
   return (
     <View style={styles.container}>
@@ -14,8 +24,8 @@ const Bucket = (props) => {
           styles.bucket(x, y, height, width, color),
           {
             transform: [{ translateY: animatedValue.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, -5],
+                inputRange: [scaleVertical(0), scaleVertical(1)],
+                outputRange: [scaleVertical(0), scaleVertical(-5)],
               }),
             }],
           },
@@ -29,25 +39,25 @@ const Bucket = (props) => {
 
 export default Bucket;
 
-const styles = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   container: {
     position: "absolute",
   },
   bucket: (x, y, height, width, color) => ({
     justifyContent: "center",
     alignItems: "center",
-    top: y,
-    left: x,
-    height: height,
-    width: width,
+    top: scaleVertical(y),
+    left: normalize(x),
+    height: scaleVertical(height),
+    width: normalize(width),
     backgroundColor: color,
-    borderRadius: 2
+    borderRadius: normalize(2)
     
   }),
   pointsText: {
-    color: "#ffffff",
+    color: theme.white,
     fontWeight: "bold",
-    fontSize: 4,
+    fontSize: normalize(4),
     
   },
 });

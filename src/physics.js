@@ -4,18 +4,18 @@ import { Animated, Dimensions } from "react-native";
 //components
 import Ball from "./components/Ball";
 
+//common utils 
+import { BALL_RADIUS } from "./utils/CommonUtils";
+
 const { width: screenWidth } = Dimensions.get("window");
 let ballCount = 0;
-const collidePairs = new Set();
 
-const Physics = (entities, { time, dispatch, events }, targetBucket = 2) => {
+const Physics = (entities, { time,  events }, targetBucket = 2) => {
   const engine = entities.physics.engine;
 
   Matter.Engine.update(engine, time.delta);
 
   const defaultGravity = 0;
-
-
   const eventsArray = events || [];
 
   if (eventsArray) {
@@ -23,7 +23,7 @@ const Physics = (entities, { time, dispatch, events }, targetBucket = 2) => {
       if (event.type === "add-ball") {
         const newBallId = `ball_${ballCount}`;
         const newBall = {
-          body: Matter.Bodies.circle(screenWidth / 2, 50, 3, {
+          body: Matter.Bodies.circle(screenWidth / 2, 50, BALL_RADIUS, {
             density: 0.1,
             restitution: 0.5,
             velocity: { x: 0, y: 5 },
@@ -31,7 +31,7 @@ const Physics = (entities, { time, dispatch, events }, targetBucket = 2) => {
             frictionAir: 0.05,
             label: "ball",
           }),
-          size: [6, 6],
+          size: [BALL_RADIUS*2, BALL_RADIUS*2],
           renderer: Ball,
         };
 
@@ -53,12 +53,21 @@ const Physics = (entities, { time, dispatch, events }, targetBucket = 2) => {
 
   Matter.Events.on(engine, "collisionStart", (event) => {
     const pairs = event.pairs;
+    const forceMagnitude = 4;
+
     pairs.forEach((pair) => {
       const { bodyA, bodyB } = pair;
 
       const ball = bodyA.label === "ball" ? bodyA : bodyB;
       const plinko = bodyA.label === "plinko" ? bodyA : bodyB;
-      const forceMagnitude = 4;
+
+      const plinkoEntityKey = Object.keys(entities).find(
+        (key) => entities[key].body === plinko
+      );
+
+      if (plinkoEntityKey) {
+        entities[plinkoEntityKey].isHighlighted = true;
+      }
 
       if (plinko.isFirstColumn) {
         Matter.Body.setVelocity(ball, { x: 0.5, y: -2 });
@@ -87,12 +96,12 @@ const Physics = (entities, { time, dispatch, events }, targetBucket = 2) => {
           yDifferenceBetweenBallAndBucket > 5 &&
           xDifferenceBetweenBallAndBucket < 2
         ) {
-          xDirectionVelocity = 1.5;
+          xDirectionVelocity = 1.6;
         } else if (
           yDifferenceBetweenBallAndBucket > 5 &&
           xDifferenceBetweenBallAndBucket < 3
         ) {
-          xDirectionVelocity = 2.5;
+          xDirectionVelocity = 3;
         } else {
           xDirectionVelocity = 3;
         }
@@ -101,7 +110,6 @@ const Physics = (entities, { time, dispatch, events }, targetBucket = 2) => {
           (bodyA.label === "ball" && bodyB.label === "plinko") ||
           (bodyA.label === "plinko" && bodyB.label === "ball")
         ) {
-          const collisionId = `${bodyA.id}_${bodyB.id}`;
           Matter.Body.setVelocity(bodyA, { x: bodyB.velocity.x, y: -4 });
           if (bodyA.row >= 6) {
             if (xDifferenceBetweenBallAndBucket < 0) {
@@ -138,12 +146,9 @@ const Physics = (entities, { time, dispatch, events }, targetBucket = 2) => {
                 y: 0,
               });
             }
-            collidePairs.add(bodyB);
           }
         }
       }
-
-      
 
       if (
         (bodyA.label === "ball" && bodyB.label === "bucket") ||
@@ -164,6 +169,13 @@ const Physics = (entities, { time, dispatch, events }, targetBucket = 2) => {
         if (ballKey) {
           Matter.World.remove(engine.world, ballBody);
           delete entities[ballKey];  
+
+          const bucketEntity = entities[bucketKey];
+          const points = bucketEntity.points;
+
+          if (bucketEntity.updateScore) {
+            bucketEntity.updateScore(points);
+          }
 
           Animated.sequence([
             Animated.timing(animatedValue, {
