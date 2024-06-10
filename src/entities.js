@@ -15,7 +15,7 @@ const entities = (handleScore) => {
   let engine = Matter.Engine.create({ enableSleeping: false });
   let world = engine.world;
 
-  engine.world.gravity.y = 0.2;
+  engine.world.gravity.y = 0.33;
   engine.world.gravity.x = 0;
 
   const numberOfRows = NUMBER_OF_ROWS;
@@ -64,7 +64,8 @@ const entities = (handleScore) => {
         isHighlighted: false,
         label: "plinko",
         row: i,
-        isFirstColumn: j === 0
+        isFirstColumn: j === 0,
+        isLastColumn: j === i + 2
       });
       Matter.World.add(world, plinko);
       plinkos.push({

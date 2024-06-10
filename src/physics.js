@@ -10,8 +10,10 @@ import { BALL_RADIUS } from "./utils/CommonUtils";
 const { width: screenWidth } = Dimensions.get("window");
 let ballCount = 0;
 
-const Physics = (entities, { time,  events }, targetBucket = 2) => {
+const Physics = (randomNumber) => (entities, { time,  events }) => {
+
   const engine = entities.physics.engine;
+  const targetBucket = randomNumber;
 
   Matter.Engine.update(engine, time.delta);
 
@@ -27,8 +29,8 @@ const Physics = (entities, { time,  events }, targetBucket = 2) => {
             density: 0.1,
             restitution: 0.5,
             velocity: { x: 0, y: 5 },
-            friction: 0.5,
-            frictionAir: 0.05,
+            friction: 0.7,
+            frictionAir: 0.08,
             label: "ball",
           }),
           size: [BALL_RADIUS*2, BALL_RADIUS*2],
@@ -52,8 +54,9 @@ const Physics = (entities, { time,  events }, targetBucket = 2) => {
   }
 
   Matter.Events.on(engine, "collisionStart", (event) => {
+    engine.world.gravity.x = 0;
     const pairs = event.pairs;
-    const forceMagnitude = 4;
+    const forceMagnitude = 7;
 
     pairs.forEach((pair) => {
       const { bodyA, bodyB } = pair;
@@ -65,6 +68,7 @@ const Physics = (entities, { time,  events }, targetBucket = 2) => {
         (key) => entities[key].body === plinko
       );
 
+
       if (plinkoEntityKey) {
         entities[plinkoEntityKey].isHighlighted = true;
       }
@@ -73,6 +77,12 @@ const Physics = (entities, { time,  events }, targetBucket = 2) => {
         Matter.Body.setVelocity(ball, { x: 0.5, y: -2 });
         Matter.Body.applyForce(bodyA, bodyB.position, {
           x: forceMagnitude,
+          y: 0,
+        });
+      } else if (plinko.isLastColumn) {
+        Matter.Body.setVelocity(ball, { x: -0.5, y: -2 });
+        Matter.Body.applyForce(bodyA, bodyB.position, {
+          x: -forceMagnitude,
           y: 0,
         });
       } else {
@@ -96,14 +106,14 @@ const Physics = (entities, { time,  events }, targetBucket = 2) => {
           yDifferenceBetweenBallAndBucket > 5 &&
           xDifferenceBetweenBallAndBucket < 2
         ) {
-          xDirectionVelocity = 1.6;
+          xDirectionVelocity = 2.2;
         } else if (
           yDifferenceBetweenBallAndBucket > 5 &&
           xDifferenceBetweenBallAndBucket < 3
         ) {
-          xDirectionVelocity = 3;
+          xDirectionVelocity = 2.8;
         } else {
-          xDirectionVelocity = 3;
+          xDirectionVelocity = 3.2
         }
   
         if (
@@ -111,30 +121,32 @@ const Physics = (entities, { time,  events }, targetBucket = 2) => {
           (bodyA.label === "plinko" && bodyB.label === "ball")
         ) {
           Matter.Body.setVelocity(bodyA, { x: bodyB.velocity.x, y: -4 });
-          if (bodyA.row >= 6) {
+          if (bodyA.row >= 2) {
             if (xDifferenceBetweenBallAndBucket < 0) {
               Matter.Body.setVelocity(bodyA, { x: -xDirectionVelocity, y: -4 });
               Matter.Body.applyForce(bodyA, bodyB.position, {
                 x: -forceMagnitude,
                 y: 0,
               });
-              engine.world.gravity.x = 1;
+              engine.world.gravity.x = -1.9;
               engine.world.gravity.isPoint = true;
             } else if (xDifferenceBetweenBallAndBucket === 0) {
               const randomNumber = Math.floor(Math.random() * 2);
               if(randomNumber === 0) {
+                const randomNumberForMagnitude = Math.floor(Math.random() * 2)
+                const randomMagnitude =  randomNumberForMagnitude === 0 ? -1 : 1 
                 Matter.Body.applyForce(bodyA, bodyB.position, {
-                  x: -forceMagnitude,
+                  x: forceMagnitude * randomMagnitude,
                   y: 0,
                 });
-                engine.world.gravity.x = 1;
+                engine.world.gravity.x = 1 * randomMagnitude;
                 engine.world.gravity.isPoint = true;
               }else {
                 Matter.Body.applyForce(bodyA, bodyB.position, {
                   x: forceMagnitude,
                   y: 0,
                 });
-                engine.world.gravity.x = 1;
+                engine.world.gravity.x = 1.9;
                 engine.world.gravity.isPoint = true;
               }
               

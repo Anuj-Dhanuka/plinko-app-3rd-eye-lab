@@ -1,6 +1,6 @@
 import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import { GameEngine } from "react-native-game-engine";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { debounce } from "lodash";
 
@@ -19,17 +19,24 @@ import { useTheme } from "../context/ThemeContext";
 //dimension utils
 import { normalize, scaleVertical } from "../utils/DimensionUtils";
 
+//common utils 
+import { NUMBER_OF_ROWS } from "../utils/CommonUtils";
+
 const GameApp = () => {
   const {currentTheme} = useTheme()
   const gameEngineRef = useRef(null);
   const dispatch = useDispatch()
+
+  const [randomNumber, setRandomNumber] = useState(NUMBER_OF_ROWS/2);
 
   const score = (useSelector(({ scoreReducer }) => scoreReducer.score)).toFixed(1)
   const styles = getStyles(currentTheme);
 
   const addBall = useCallback(
     debounce(() => {
-      gameEngineRef.current.dispatch({ type: "add-ball" });
+      const randomNumber = Math.floor(Math.random() * (NUMBER_OF_ROWS + 1)) + 1; 
+      setRandomNumber(randomNumber)
+      gameEngineRef.current.dispatch({ type: "add-ball"});
     }, 200)
   );
 
@@ -44,11 +51,15 @@ const GameApp = () => {
         <Text style={styles.scoreText}>Score: {score}</Text>
       </View>
 
+      <View style={styles.randomNumberContainer}>
+        <Text style={styles.randomNumberText}>Target Bucket: {randomNumber}</Text>
+      </View>
+
       <GameEngine
         ref={gameEngineRef}
         style={styles.gameEngine}
-        entities={entities(handleScore)}
-        systems={[Physics]}
+        entities={entities(handleScore, randomNumber)}
+        systems={[Physics(randomNumber)]}
       />
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={addBall}>
@@ -79,6 +90,23 @@ const getStyles = (theme) => StyleSheet.create({
   scoreText: {
     color: theme.white,
     fontSize: normalize(20),
+    fontWeight: "bold",
+  },
+  randomNumberContainer: {
+    position: "absolute",
+    top: scaleVertical(60),
+    right: normalize(10),
+    backgroundColor: theme.scoreContainerBackgroundColor,
+    justifyContent: "center",
+    alignItems: "center",
+    borderColor: theme.randomNumberContainerBorderBottomColor,
+    borderWidth: scaleVertical(2),
+    borderRadius: normalize(10),
+    padding: 10
+  },
+  randomNumberText: {
+    color: theme.white,
+    fontSize: normalize(14),
     fontWeight: "bold",
   },
   buttonContainer: {
