@@ -30,8 +30,8 @@ const getStyles = (theme) => StyleSheet.create({
   },
   ball: (x, y, width, height) => ({
     position: "absolute",
-    left: normalize(x),
-    top: scaleVertical(y),
+    left: x,
+    top: y,
     width: normalize(width),
     height: scaleVertical(height),
     borderRadius: normalize(width / 2),

@@ -46,8 +46,8 @@ const getStyles = (theme) => StyleSheet.create({
   bucket: (x, y, height, width, color) => ({
     justifyContent: "center",
     alignItems: "center",
-    top: scaleVertical(y),
-    left: normalize(x),
+    top: y,
+    left: x,
     height: scaleVertical(height),
     width: normalize(width),
     backgroundColor: color,

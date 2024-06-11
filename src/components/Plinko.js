@@ -57,8 +57,8 @@ export default Plinko;
 const getStyles = (theme) => StyleSheet.create({
   container: (x, y) => ({
     position: "absolute",
-    top: scaleVertical(y),
-    left: normalize(x),
+    top: y,
+    left: x,
   }),
   plinko: (width, height) => ({
     height: scaleVertical(height),
