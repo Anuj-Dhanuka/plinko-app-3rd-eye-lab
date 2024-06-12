@@ -120,10 +120,10 @@ const Physics = (randomNumber) => (entities, { time,  events }) => {
           (bodyA.label === "ball" && bodyB.label === "plinko") ||
           (bodyA.label === "plinko" && bodyB.label === "ball")
         ) {
-          Matter.Body.setVelocity(bodyA, { x: bodyB.velocity.x, y: -4 });
-          if (bodyA.row >= 2) {
+          Matter.Body.setVelocity(bodyA, { x: bodyB.velocity.x, y: -3 });
+          if ( ( (targetBucket > 2 || targetBucket < 16) && bodyA.row >= 2) || ((targetBucket < 3 || targetBucket > 15)) && (bodyA.row >= 0) ) {
             if (xDifferenceBetweenBallAndBucket < 0) {
-              Matter.Body.setVelocity(bodyA, { x: -xDirectionVelocity, y: -4 });
+              Matter.Body.setVelocity(bodyA, { x: -xDirectionVelocity, y: -3 });
               Matter.Body.applyForce(bodyA, bodyB.position, {
                 x: -forceMagnitude,
                 y: 0,
@@ -152,7 +152,7 @@ const Physics = (randomNumber) => (entities, { time,  events }) => {
               
             } 
             else {
-              Matter.Body.setVelocity(bodyA, { x: xDirectionVelocity, y: -4 });
+              Matter.Body.setVelocity(bodyA, { x: xDirectionVelocity, y: -3 });
               Matter.Body.applyForce(bodyA, bodyB.position, {
                 x: forceMagnitude,
                 y: 0,

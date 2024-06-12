@@ -15,7 +15,7 @@ const entities = (handleScore) => {
   let engine = Matter.Engine.create({ enableSleeping: false });
   let world = engine.world;
 
-  engine.world.gravity.y = 0.33;
+  engine.world.gravity.y = 0.37;
   engine.world.gravity.x = 0;
 
   const numberOfRows = NUMBER_OF_ROWS;
