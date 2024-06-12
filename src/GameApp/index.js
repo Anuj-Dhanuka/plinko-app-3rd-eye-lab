@@ -27,15 +27,28 @@ const GameApp = () => {
   const gameEngineRef = useRef(null);
   const dispatch = useDispatch()
 
-  const [randomNumber, setRandomNumber] = useState(NUMBER_OF_ROWS/2);
+  const [randomNumber, setRandomNumber] = useState(4);
+  const [randomRow, setRandomRow] = useState(NUMBER_OF_ROWS/2)
+
+  
 
   const score = (useSelector(({ scoreReducer }) => scoreReducer.score)).toFixed(1)
   const styles = getStyles(currentTheme);
 
+  const getRandomRow = () => {
+    const randomRowMin = (NUMBER_OF_ROWS/2) - 3 
+  const randomRowMax = (NUMBER_OF_ROWS/2) + 1  
+  const randomRow = Math.floor(Math.random() * (randomRowMax - randomRowMin + 1)) + randomRowMin  
+  return randomRow
+  }
+
   const addBall = useCallback(
     debounce(() => {
       const randomNumber = Math.floor(Math.random() * (NUMBER_OF_ROWS + 1)) + 1; 
-      setRandomNumber(randomNumber)
+      //setRandomNumber(randomNumber)
+      const randomRow = getRandomRow()
+      setRandomRow(randomRow)
+
       gameEngineRef.current.dispatch({ type: "add-ball"});
     }, 200)
   );
@@ -59,7 +72,7 @@ const GameApp = () => {
         ref={gameEngineRef}
         style={styles.gameEngine}
         entities={entities(handleScore, randomNumber)}
-        systems={[Physics(randomNumber)]}
+        systems={[Physics(randomNumber, randomRow)]}
       />
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={addBall}>

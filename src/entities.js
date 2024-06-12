@@ -5,8 +5,8 @@ import { Animated, Dimensions } from "react-native";
 import Plinko from "./components/Plinko";
 import Bucket from "./components/Bucket";
 
-//utils
-import { NUMBER_OF_ROWS, PLINKO_RADIUS, SPACING_Y, SPACING_X, PLINKO_TOP_DISTANCE, BUCKET_HEIGHT } from "./utils/CommonUtils";
+//common utils
+import { NUMBER_OF_ROWS, PLINKO_RADIUS, SPACING_Y, SPACING_X, PLINKO_TOP_DISTANCE, BUCKET_HEIGHT, DEFAULT_ENGINE_GRAVITY_Y, DEFAULT_ENGINE_GRAVITY_X } from "./utils/CommonUtils";
 
 const { width: screenWidth} = Dimensions.get("window");
 
@@ -15,8 +15,8 @@ const entities = (handleScore) => {
   let engine = Matter.Engine.create({ enableSleeping: false });
   let world = engine.world;
 
-  engine.world.gravity.y = 0.37;
-  engine.world.gravity.x = 0;
+  engine.world.gravity.y = DEFAULT_ENGINE_GRAVITY_Y;
+  engine.world.gravity.x = DEFAULT_ENGINE_GRAVITY_X;
 
   const numberOfRows = NUMBER_OF_ROWS;
   const plinkoRadius = PLINKO_RADIUS;
@@ -59,7 +59,7 @@ const entities = (handleScore) => {
       const plinkoX = rowXStart + plinkoSpacingX * j;
       const plinko = Matter.Bodies.circle(plinkoX, plinkoY, plinkoRadius, {
         isStatic: true,
-        restitution: 1,
+        restitution: 0.8,
         friction: 0.5,
         isHighlighted: false,
         label: "plinko",
